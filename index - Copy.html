@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalized Recommendations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        section {
+            display: none;
+        }
+        section.active {
+            display: block;
+        }
+        form, .recommendation {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        label, input, select, button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Homepage Section -->
+    <section id="homepage" class="active">
+        <h1>Welcome to Personalized Recommendations</h1>
+        <p>Click the button below to provide your details and get started!</p>
+        <button onclick="showSection('form')">Start Here</button>
+    </section>
+
+    <!-- Form Section -->
+    <section id="form">
+        <h1>Enter Your Details</h1>
+        <form id="userForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" required>
+
+            <label for="weight">Weight (kg):</label>
+            <input type="number" id="weight" name="weight" required>
+
+            <label for="height">Height (cm):</label>
+            <input type="number" id="height" name="height" required>
+
+            <label for="gender">Gender:</label>
+            <select id="gender" name="gender" required>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+
+            <label for="diet">Diet Preference:</label>
+            <select id="diet" name="diet" required>
+                <option value="vegetarian">Vegetarian</option>
+                <option value="non-vegetarian">Non-Vegetarian</option>
+                <option value="vegan">Vegan</option>
+            </select>
+
+            <label for="goal">Workout Goal:</label>
+            <select id="goal" name="goal" required>
+                <option value="weight_loss">Weight Loss</option>
+                <option value="muscle_gain">Muscle Gain</option>
+                <option value="general_fitness">General Fitness</option>
+            </select>
+
+            <button type="submit">Submit</button>
+        </form>
+    </section>
+
+    <!-- Result Section -->
+    <section id="result">
+        <h1>Your Personalized Recommendations</h1>
+        <div id="recommendation-content"></div>
+        <button onclick="showSection('homepage')">Go Back to Homepage</button>
+    </section>
+
+    <script>
+        // Function to switch between sections
+        function showSection(sectionId) {
+            document.querySelectorAll('section').forEach((section) => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        // Form Submission Handler
+        const form = document.getElementById('userForm');
+        const contentDiv = document.getElementById('recommendation-content');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const userData = {
+                name: formData.get('name'),
+                age: parseInt(formData.get('age')),
+                weight: parseInt(formData.get('weight')),
+                height: parseInt(formData.get('height')),
+                gender: formData.get('gender'),
+                diet: formData.get('diet'),
+                goal: formData.get('goal')
+            };
+
+            const recommendations = generateRecommendations(userData);
+
+            contentDiv.innerHTML = `
+                <p><strong>Name:</strong> ${userData.name}</p>
+                <div class="recommendation">
+                    <h2>Morning</h2>
+                    <p><strong>Diet:</strong> ${recommendations.morning.food.join(', ')}</p>
+                    <p><strong>Workout:</strong> ${recommendations.morning.workout} for 30 minutes</p>
+                </div>
+                <div class="recommendation">
+                    <h2>Afternoon</h2>
+                    <p><strong>Diet:</strong> ${recommendations.afternoon.food.join(', ')}</p>
+                </div>
+                <div class="recommendation">
+                    <h2>Night</h2>
+                    <p><strong>Diet:</strong> ${recommendations.night.food.join(', ')}</p>
+                    <p><strong>Workout:</strong> ${recommendations.night.workout} for 20 minutes</p>
+                </div>
+            `;
+
+            showSection('result');
+        });
+
+        // Simulated Recommendation Generator
+        function generateRecommendations(data) {
+            const foodDatabase = {
+                vegetarian: { breakfast: ["Oatmeal", "Smoothie"], lunch: ["Paneer Curry"], dinner: ["Veg Stew"] },
+                "non-vegetarian": { breakfast: ["Eggs"], lunch: ["Chicken Salad"], dinner: ["Grilled Fish"] },
+                vegan: { breakfast: ["Chia Pudding"], lunch: ["Tofu Salad"], dinner: ["Lentil Soup"] }
+            };
+
+            const workoutDatabase = {
+                weight_loss: ["Cardio", "Yoga"],
+                muscle_gain: ["Weightlifting", "Core Strength"],
+                general_fitness: ["Jogging", "Pilates"]
+            };
+
+            const dietPlan = foodDatabase[data.diet.toLowerCase()];
+            const workouts = workoutDatabase[data.goal.toLowerCase()];
+
+            return {
+                morning: { food: dietPlan.breakfast, workout: workouts[0] },
+                afternoon: { food: dietPlan.lunch },
+                night: { food: dietPlan.dinner, workout: workouts[1] }
+            };
+        }
+    </script>
+</body>
+</html>
